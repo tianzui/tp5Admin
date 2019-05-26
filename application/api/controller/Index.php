@@ -16,9 +16,7 @@ class Index extends Base
 
     public function getMenu()
     {
-        $token = checkHeader();
-        $result = Db::table('user')->alias('u')->join('group g', 'u.id = g.uid')->field('u.*,g.group_id')->where('u.token', $token)->find();
-        $roleId = $result['group_id'];
+        $roleId = checkHeader();
         $menuList = getMenuList($roleId);
         if (!empty($menuList)) {
             return json(['code' => 10000, 'msg' => '获取成功', 'data' => $menuList]);

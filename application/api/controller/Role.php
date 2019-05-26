@@ -17,15 +17,24 @@ class Role extends Base
      */
     public function getRole()
     {
-        checkHeader();
+        $checkHeader = checkHeader();
+        if($checkHeader!=true){
+            return $checkHeader;
+        }
         //当前页码
         $currentPage = input('post.currentPage');
-        $countList = Db::table('role')->field('count(*)')->find();
+        $countList = Db::table('auth_group')->field('count(*)')->find();
         $count = $countList['count(*)'];
         $pageSize = input('post.PageSize');
         $startNum = ($currentPage - 1) * $pageSize;
         $limit = "$startNum,$pageSize";
-        $roleList = Db::table('role')->limit($limit)->select();
+        $roleList = Db::table('auth_group')->limit($limit)->select();
+//        $ruleList = Db::table('auth_rule')->select();
+        foreach ($roleList as $key => $value){
+            $where['id'] = array('in', $roleList[$key]['rules']);
+            $ruleList = Db::table('auth_rule')->where($where)->select();
+            $roleList[$key]['child'] = getTree($ruleList,0,0);
+        }
         if (!empty($roleList)) {
             return json(['code' => 10000, 'msg' => '查询成功', 'data' => $roleList, 'count' => $count]);
         } else {
@@ -47,7 +56,7 @@ class Role extends Base
         $name = input('post.name');
         $desc = input('post.desc');
         $data = ['title' => $name, 'role_desc' => $desc];
-        $result = Db::table('role')->insertGetId($data);
+        $result = Db::table('auth_group')->insertGetId($data);
         if (!empty($result)) {
             return json(['code' => 10000, 'msg' => '添加成功']);
         } else {
@@ -68,7 +77,7 @@ class Role extends Base
     {
         checkHeader();
         $roleId = input('post.id');
-        $result = Db::table('role')->delete($roleId);
+        $result = Db::table('auth_group')->delete($roleId);
         if (!empty($result)) {
             return json(['code' => 10000, 'msg' => '删除成功']);
         } else {
@@ -92,7 +101,7 @@ class Role extends Base
         $name = input('post.name');
         $desc = input('post.desc');
         $id = input('post.id');
-        $result = Db::table('role')->where('id', $id)->update(['title' => $name, 'role_desc' => $desc]);
+        $result = Db::table('auth_group')->where('id', $id)->update(['title' => $name, 'role_desc' => $desc]);
         if (!empty($result)) {
             return json(['code' => 10000, 'msg' => '修改成功']);
         } else {

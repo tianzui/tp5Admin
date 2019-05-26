@@ -10,8 +10,8 @@ class Login extends Controller
     {
         $username = input('post.username');
         $password = md5(input('post.password'));
-        $result = Db::table('user')->where("username = '$username' AND password = '$password'")->find();
-        $role = Db::table('group')->where('uid',$result['id'])->find();
+        $result = Db::table('admin_user')->where("username = '$username' AND password = '$password'")->find();
+        $role = Db::table('auth_group_access')->where('uid',$result['id'])->find();
         if (!empty($result)) {
             //账号密码正确时，返回token给前端
             session('roleId',$role['group_id']);
@@ -26,5 +26,11 @@ class Login extends Controller
         $str = md5(uniqid(md5($username), true)); //生成一个不会重复的字符串
         $str = sha1($str); //加密
         return $str;
+    }
+
+    public function getMenu(){
+        $ruleList = Db::table('auth_rule')->select();
+        $rules = get($ruleList,0,0);
+        dump($rules);
     }
 }
