@@ -15,7 +15,7 @@ class Login extends Controller
         if (!empty($result)) {
             //账号密码正确时，返回token给前端
             session('roleId',$role['group_id']);
-            return json(['code' => 10000, 'msg' => '登录成功', 'token' => $result['token']]);
+            return json(['code' => 10000, 'msg' => '登录成功', 'data' => $result]);
         } else {
             return json(['code' => 10001, 'msg' => '登录失败']);
         }

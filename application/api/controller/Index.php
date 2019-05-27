@@ -24,4 +24,8 @@ class Index extends Base
             return json(['code' => 10001, 'msg' => '数据异常']);
         }
     }
+
+    public function logOut(){
+        return json(['code'=>10000,'msg'=>'退出成功']);
+    }
 }
