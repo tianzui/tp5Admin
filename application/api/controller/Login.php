@@ -1,6 +1,8 @@
 <?php
 
 namespace app\api\controller;
+
+use Firebase\JWT\JWT;
 use think\Db;
 use think\Controller;
 
@@ -11,26 +13,29 @@ class Login extends Controller
         $username = input('post.username');
         $password = md5(input('post.password'));
         $result = Db::table('admin_user')->where("username = '$username' AND password = '$password'")->find();
-        $role = Db::table('auth_group_access')->where('uid',$result['id'])->find();
         if (!empty($result)) {
+            $newObj = array(
+                "id" => $result['id'],
+                "username" => $result['username'],
+                "time" => time() + 3600
+            );
+            $key = "vuethinkkphp";
+            $token = JWT::encode($newObj, $key);
             //账号密码正确时，返回token给前端
-            session('roleId',$role['group_id']);
-            return json(['code' => 10000, 'msg' => '登录成功', 'data' => $result]);
+            return json(['code' => 10000, 'msg' => '登录成功', 'data' => $token]);
         } else {
             return json(['code' => 10001, 'msg' => '登录失败']);
         }
     }
 
-    public function makeToken($username)
+    /**
+     * 解密测试，上线前需删除
+     */
+    public function getKey()
     {
-        $str = md5(uniqid(md5($username), true)); //生成一个不会重复的字符串
-        $str = sha1($str); //加密
-        return $str;
-    }
-
-    public function getMenu(){
-        $ruleList = Db::table('auth_rule')->select();
-        $rules = get($ruleList,0,0);
-        dump($rules);
+        $key = "vuethinkkphp";
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInRpbWUiOjE1NTkxMjEyNDF9.DeSm7MYnYzu3zsmPk0SSMM3pB4KLRBLKjwjMU_xnGFE';
+        $list = JWT::decode($token, $key, array('HS256'));
+        dump($list);
     }
 }
